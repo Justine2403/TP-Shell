@@ -31,12 +31,12 @@ int main (int argc, char **argv[]){
         // waiting for an user to write a command 
         read(0, buffer, BUFSIZE); //storing message input in buffer 
 
-        // Check if the input is fortune if yes write fortune message, 7 is the size of "fortune"
+        // check if the input is fortune if yes write fortune message, 7 is the size of "fortune"
         if (strncmp(buffer, "fortune", 7) == 0){
             write(1, msg_fortune, strlen(msg_fortune));
         }
 
-        // Else show the date 
+        // show the date if input is "date"
         if (strncmp(buffer, "date", 4) == 0){
 			write(1, msg_date, strlen(msg_date));
 		}
