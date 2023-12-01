@@ -37,7 +37,7 @@ int main (int argc, char **argv[]){
         }
 
         // Else show the date 
-        else{
+        if (strncmp(buffer, "date", 4) == 0){
 			write(1, msg_date, strlen(msg_date));
 		}
 		// output of the prompt again 
