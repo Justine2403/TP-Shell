@@ -40,6 +40,11 @@ Nous voulons afficher à chaque message prompt l'état du programme compilé ava
 
 - Si le processus child du dernier programme compilé s'achève normalement, nous affichons dans le message prompt **enseash [exit:0]**.
 - Si le processus child du dernier programme est arrêté par un signal, nous affichichons dans le message prompt **enseash [sign:n]** avec n le nombre du signal utilisé pour arréter le processus child du dernier programme.
+Nous utilisons la fonction **WIFEXITED** pour savoir de quelle manière est teminé le processus fils.
 
 ## 5. Mesure du temps d’exécution de la commande en utilisant l’appel clock_gettime :
-  
+En plus du retour exit ou signal sur le dernier programme compilé, nous souhaitons ajouter le temps d'éxecution. 
+Pour cela, nous utilisons la fonction **clock_gettime** et l'appelons dans la fonction qui affiche le message prompt. 
+
+Expliquons en details ce que fait la fonction **clock_gettime** :
+- t
