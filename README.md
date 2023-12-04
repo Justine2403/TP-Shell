@@ -35,3 +35,4 @@ Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. C
 - **Sortir du microshell avec ctrl+d :**
 Pour savoir si l'utilisateur a utilisé ces deux touches, nous stockons dans une variable "bytesRead" la sortie de l'appel de la fonction read(0,command,49) (command est la chaîne de caractères qui stocke la commande entrée par l'utilisateur). Si bytesRead est égale à 0 alors l'utilisateur a bien cliqué sur <ctrl>+D. Dans ce cas là, nous appelons la fonction qui affiche le message bye bye puis nous sortons de la boucle while. 
 
+## 3. Affichage du code de retour (ou du signal) de la commande précédente dans le prompt :
