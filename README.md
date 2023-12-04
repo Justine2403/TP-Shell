@@ -26,11 +26,11 @@ Pour l'instant, nous sommes arrivées à exécuter des commandes dans notre micr
 Dans la même boucle, nous faisons appel à une fonction définie dans le document functions.h (Cf. dossier Q2). Cette fonction a pour but d'écrire le message prompt en utilisant write, elle est appelée avant de stocker le processus fils et une fois que nous soyons sortie du processus fils et dans l'attente d'une nouvelle commande.
  
 ## 3. Gestion de la sortie du shell avec la commande “exit” ou un <ctrl>+d : 
-Pour sortir du microshell il faut casser la boucle avec la fonction **break** dans notre programme.
+Pour sortir du microshell il faut casser la boucle avec la fonction **exit(EXIT_SUCESS)** dans notre programme.
 Nous créeons comme pour le message prompt, une fonction qui affiche un message de bye bye que nous allons appeler dans la suite.
 
 - **Sortir du microshell avec la commande exit :**
-Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. Cela se fait grâce à la fonction exceclp qui compare la commande entrée avec exit qui existe déjà dans le terminal. Si nous sommes dans ce cas la fonction du message bye bye est appelé puis nous cassons la boucle (break).
+Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. Cela se fait grâce à la fonction exceclp qui compare la commande entrée avec exit qui existe déjà dans le terminal. Si nous sommes dans ce cas la fonction du message bye bye est appelé puis nous cassons la boucle avec exit(EXIT_SUCESS).
 
 - **Sortir du microshell avec ctrl+d :**
 Pour savoir si l'utilisateur a utilisé ces deux touches, nous stockons dans une variable "bytesRead" la sortie de l'appel de la fonction read(0,command,49) (command est la chaîne de caractères qui stocke la commande entrée par l'utilisateur). Si bytesRead est égale à 0 alors l'utilisateur a bien cliqué sur <ctrl>+D. Dans ce cas là, nous appelons la fonction qui affiche le message bye bye puis nous sortons de la boucle while. 
@@ -46,5 +46,20 @@ Nous utilisons la fonction **WIFEXITED** pour savoir de quelle manière est temi
 En plus du retour exit ou signal sur le dernier programme compilé, nous souhaitons ajouter le temps d'éxecution. 
 Pour cela, nous utilisons la fonction **clock_gettime** et l'appelons dans la fonction qui affiche le message prompt. 
 
-Expliquons en details ce que fait la fonction **clock_gettime** :
-- t
+Expliquons en details ce que fait les differentes fonctions de **clock_gettime** :
+- clock_gettime(CLOCK_REALTIME, &start) permet d'obtenir le temps actuelle du système (clock_gettime(CLOCK_REALTIME)) et le stocke dans la structure start
+- clock_gettime(CLOCK_REALTIME, &end) utilise à nouveau clock_gettime pour obtenir le temps actuel et le stocke dans la structure end après la fin de l'exécution du processus fils.
+
+waitpid(pid, &status, 0) attend que le processus fils identifié par le PID (pid) se termine. Pendant cette attente, le processus parent est bloqué. La fonction waitpid stocke le statut de sortie du processus fils dans la variable status.
+
+On calcule ensuite la différence de temps, elle est calculée en millisecondes à l'aide des champs tv_sec (secondes) et tv_nsec (nanosecondes) de la structure start et end. Cette différence est stockée dans la variable time_diff.
+On implémente ensuite ce temps dans le prompt_message afin de l'afficher sur notre shell.
+
+## 6. Exécution d’une commande complexe (avec arguments) :
+Dans cette partie, nous cherchons à executer une commande avec arguments dans le shell.
+
+- Pour cela nous allons créer une fonction token qui permet d'extraire le premier jeton (token) de la chaîne command. **strtok** est utilisée pour diviser une chaîne en jetons en fonction d'un délimiteur spécifié. Dans ce cas, le délimiteur est un espace (" ").
+- On crée un tableau de pointeurs de caractères (args) pour stocker les tokens. MAX_SIZE est le nombre maximum de tokens que nous pouvons gérer.
+- La variable arg_count est utilisée pour suivre le nombre de tokens.
+- Nous executons ensuite une boucle qui continue jusqu'à ce qu'il n'y ait plus de tokens. La condition vérifie si le jeton actuel n'est pas NULL.
+
