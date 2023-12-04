@@ -12,11 +12,32 @@ int print_welcome_message() {
 	write(1, msgWelcome, strlen(msgWelcome)); //fd = 1 is for Standard Output which is our terminal	
 }
 
-int print_prompt_message() {
-	//show of simple prompt
-    char *msgPrompt = "\nenseash % ";
-    //length of the string with strlen
-	write(1, msgPrompt, strlen(msgPrompt));
+// Prints the prompt message.
+void print_prompt_message(int status) {
+    char msg[50];     // Declare a character array to hold message to be printed.
+    // Check if the child process exited normally.
+    if (WIFEXITED(status)) {
+        // If it did, get the exit status of the child.
+        int exit_status = WEXITSTATUS(status);
+        // Format the message to include the exit status.
+        int len = sprintf(msg, "\nenseash [exit:%d] %% ", exit_status);
+        // Write the message to the standard output.
+        write(1, msg, len);
+    } 
+    // Check if the child process was terminated by a signal.
+    else if (WIFSIGNALED(status)) {
+        // If it was, get the signal number that terminated the process.
+        int term_signal = WTERMSIG(status);
+        // Format the message to include the signal number.
+        int len = sprintf(msg, "\nenseash [sign:%d] %% ", term_signal);
+        // Write the message to the standard output.
+        write(1, msg, len);
+    } 
+    // If the child process neither exited normally nor was terminated by a signal,
+    // just print "enseash % ".
+    else {
+        write(1, "\nenseash % ", 10);
+    }
 }
 
 int print_bye_message(){
@@ -25,64 +46,51 @@ int print_bye_message(){
 	write(1, msg_bye, strlen(msg_bye));
 }
 
-int main (int argc, char **argv[]){
-    int status, i , N;
-    print_welcome_message();
-    print_prompt_message();
-    // infinite loop
-    while (1) {
-
+void execute_exit(){
     // define a array to store the command
-    char command[50];
-
-    int bytesRead = read(0, command, 49);
-
-    // Check for Ctrl+D command
-    if (bytesRead == 0) {
-    print_bye_message();  // print bye bye message
-    break; // break the loop
-    }
-    // replace newline character with null terminator
-    char *pos;
-    if ((pos=strchr(command, '\n')) != NULL)
-        *pos = '\0';
-
-    // check if command is "exit"
-    if (strcmp(command, "exit") == 0) {
-    print_bye_message();  // print bye bye message
-    break; // break the loop
-    }
-
-    pid_t pid = fork();// create a child process
-    for (i = 0; i < N; i++){
-        if ((pid = fork()) == 0){
-            sleep(2*(i+1)); exit(i+1);
-        }
-    } 
-
-    while ((pid = wait(&status)) != - 1) {
-        if (pid == 0) {
-        // this is the child process
-        execlp(command, command, NULL); // execute the input command
-        // this is the child process
-        if (WIFEXITED(status)){
-            write(1, "\nenseash [exit:", 15);
-            write(1, WEXITSTATUS(status), strlen(WEXITSTATUS(status)));
-            write(1, "] % ", 4);
-        }
-        else if(WIFSIGNALED(status)){
-            write(1, "\nenseash [sign:", 15);
-            write(1, WTERMSIG(status), strlen(WTERMSIG(status)));
-            write(1, "] % ", 4);    
-        }
-        }   
+    char command[50]; 
+    int status = -1;
+        while(1){
+        print_prompt_message(status);
+        int bytesRead = read(0, command, 49);
         
-        else{
-        wait(NULL);
+        // Check for Ctrl+D command
+        if (bytesRead == 0) {
+        print_bye_message();  // print bye bye message
+        break; // break the loop
         }
-    }
 
-    // output of the prompt again 
-    print_prompt_message();   
-    }
+        // replace newline character with null terminator
+        char *pos;
+        if ((pos=strchr(command, '\n')) != NULL)
+            *pos = '\0';
+
+        // check if command is "exit"
+        if (strcmp(command, "exit") == 0) {
+        print_bye_message();  // print bye bye message
+        break; // break the loop
+        }
+        
+        // create a child process
+        pid_t pid = fork();
+
+        if (pid == 0) {
+            // this is the child process
+            execlp(command, command, NULL); // execute the input command
+            exit(0);
+        }
+        else{
+             waitpid(pid, &status, 0);
+        }
+        }
+
+}
+
+
+int main (int argc, char **argv[]){
+    // show welcome message
+	print_welcome_message();
+    execute_exit(); // execute the shell 
+    
+    return 0;
 }
