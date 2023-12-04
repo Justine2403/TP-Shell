@@ -19,17 +19,35 @@ int print_prompt_message() {
 	write(1, msgPrompt, strlen(msgPrompt));
 }
 
-void execute(){
+int print_bye_message(){
+	//show bye bye message for when exiting
+	char *msg_bye = "\nBye bye\n";
+	write(1, msg_bye, strlen(msg_bye));
+}
+
+void execute_exit(){
     // define a array to store the command
     char command[50]; 
     while (1) {
-        read(0, command, 49);   
+        int bytesRead = read(0, command, 49);
+
+        // Check for Ctrl+D command
+        if (bytesRead == 0) {
+        print_bye_message();  // print bye bye message
+        break; // break the loop
+        }
 
         // replace newline character with null terminator
         char *pos;
-        if ((pos= strchr(command, '\n')) != NULL)
+        if ((pos=strchr(command, '\n')) != NULL)
             *pos = '\0';
 
+        // check if command is "exit"
+        if (strcmp(command, "exit") == 0) {
+        print_bye_message();  // print bye bye message
+        break; // break the loop
+        }
+        
         // create a child process
         pid_t pid = fork();
 
@@ -49,7 +67,7 @@ int main (int argc, char **argv[]){
     // show welcome message
 	print_welcome_message();
     print_prompt_message();
-    execute(); // execute the shell 
+    execute_exit(); // execute the shell 
     
     return 0;
 }
