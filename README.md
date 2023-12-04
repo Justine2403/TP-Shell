@@ -47,4 +47,23 @@ En plus du retour exit ou signal sur le dernier programme compilé, nous souhait
 Pour cela, nous utilisons la fonction **clock_gettime** et l'appelons dans la fonction qui affiche le message prompt. 
 
 Expliquons en details ce que fait la fonction **clock_gettime** :
-- t
+En plus du retour exit ou signal sur le dernier programme compilé, nous souhaitons ajouter le temps d'éxecution. 
+Pour cela, nous utilisons la fonction **clock_gettime** et l'appelons dans la fonction qui affiche le message prompt. 
+
+Expliquons en details ce que fait les differentes fonctions de **clock_gettime** :
+- clock_gettime(CLOCK_REALTIME, &start) permet d'obtenir le temps actuelle du système (clock_gettime(CLOCK_REALTIME)) et le stocke dans la structure start
+- clock_gettime(CLOCK_REALTIME, &end) utilise à nouveau clock_gettime pour obtenir le temps actuel et le stocke dans la structure end après la fin de l'exécution du processus fils.
+
+- waitpid(pid, &status, 0) attend que le processus fils identifié par le PID (pid) se termine. Pendant cette attente, le processus parent est bloqué. La fonction waitpid stocke le statut de sortie du processus fils dans la variable status.
+
+- On calcule ensuite la différence de temps, elle est calculée en millisecondes à l'aide des champs tv_sec (secondes) et tv_nsec (nanosecondes) de la structure start et end. Cette différence est stockée dans la variable time_diff.
+On implémente ensuite ce temps dans le prompt_message afin de l'afficher sur notre shell.
+
+## 6. Exécution d’une commande complexe (avec arguments) :
+Dans cette partie, nous cherchons à executer une commande avec arguments dans le shell.
+
+- Pour cela nous allons créer une fonction token qui permet d'extraire le premier jeton (token) de la chaîne command. **strtok** est utilisée pour diviser une chaîne en jetons en fonction d'un délimiteur spécifié. Dans ce cas, le délimiteur est un espace (" ").
+- On crée un tableau de pointeurs de caractères (args) pour stocker les tokens. MAX_SIZE est le nombre maximum de tokens que nous pouvons gérer.
+- La variable arg_count est utilisée pour suivre le nombre de tokens.
+- Nous executons ensuite une boucle qui continue jusqu'à ce qu'il n'y ait plus de tokens. La condition vérifie si le jeton actuel n'est pas NULL.
+
