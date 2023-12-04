@@ -26,4 +26,10 @@ Pour l'instant, nous sommes arrivées à exécuter des commandes dans notre micr
 Dans la même boucle, nous faisons appel à une fonction définie dans le document functions.h (Cf. dossier Q2). Cette fonction a pour but d'écrire le message prompt en utilisant write, elle est appelée avant de stocker le processus fils et une fois que nous soyons sortie du processus fils et dans l'attente d'une nouvelle commande.
  
 ## 3. Gestion de la sortie du shell avec la commande “exit” ou un <ctrl>+d : 
+Pour sortir du microshell il faut casser la boucle avec la fonction break dans notre programme.
+Nous créeons comme pour le message prompt, une fonction qui affiche un message de bye bye que nous allons appeler dans la suite.
+- Sortir du microshell avec la commande exit :
+Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. Cela se fait grâce à la fonction exceclp qui compare la commande entrée avec exit qui existe déjà dans le terminal. Si nous sommes dans ce cas la fonction du message bye bye est appelé puis nous cassons la boucle (break).
+- Sortir du microshell avec <ctrl>+d :
+Pour savoir si l'utilisateur a utilisé ces deux touches, nous stockons dans une variable "bytesRead" la sortie de l'appel de la fonction read(0,command,49) (command est la chaîne de caractères qui stocke la commande entrée par l'utilisateur). Si bytesRead est égale à 0 alors l'utilisateur a bien cliqué sur <ctrl>+D. Dans ce cas là, nous appelons la fonction qui affiche le message bye bye puis nous sortons de la boucle while. 
 
