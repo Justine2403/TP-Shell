@@ -60,7 +60,35 @@ Dans cette partie, nous cherchons à executer une commande avec arguments dans l
 - On crée un tableau de pointeurs de caractères (args) pour stocker les tokens. MAX_SIZE est le nombre maximum de tokens que nous pouvons gérer.
 - La variable arg_count est utilisée pour suivre le nombre de tokens.
 - Nous executons ensuite une boucle qui continue jusqu'à ce qu'il n'y ait plus de tokens. La condition vérifie si le jeton actuel n'est pas NULL.
- Cette fonction sera implémenté dans la boucle if.
+
+Cette fonction sera implémenté dans la boucle if.
+
 - On remplace la fonction execlp(command, command, NULL) par execvp(args[0], args) qui execute la commande avec arguments.
+
+## 7. Gestion des redirections vers stdin et stdout avec ‘<’ et ‘>’:
+Dans cette partie, l'objectif est de gérer la redirection des entrées (<) et des sorties (>) pour les commandes saisies dans le microshell 
+On inclut d'abord <fcntl.h>
+On définit deux fonctions pour l'input et l'output.
+Pour l'input, on effectue les étapes suivantes:
+- Trouver le symbole **<** :
+       strchr recherche la première occurrence du caractère < dans la chaîne command. S'il est trouvé, il renvoie un pointeur vers cette position.
+
+- Ajuster la chaîne de commande :
+        *input_redirect = '\0'; : Termine la chaîne de commande à la position de <.
+        input_redirect++; : Déplace le pointeur vers le nom de fichier après <.
+
+- Ignorer les espaces après < :
+        while (*input_redirect == ' ') { input_redirect++; } : Ignore les espaces éventuels après <. Cela garantit qu'il n'y a pas d'espaces supplémentaires entre < et le nom de fichier.
+
+- Ouvrir le fichier en lecture :
+        int fd = open(input_redirect, O_RDONLY); : Ouvre le fichier spécifié après < en mode lecture seule (O_RDONLY).
+        Vérifie si l'ouverture du fichier a réussi, et sinon, affiche un message d'erreur et quitte.
+
+- Rediriger stdin vers le fichier :
+        dup2(fd, 0); : Redirige le descripteur de fichier fd (le fichier ouvert) vers l'entrée standard (descripteur de fichier 0).
+        close(fd); : Ferme le descripteur de fichier car il n'est plus nécessaire.
+  
+On fait de même pour l'output mais avec stdout.
+
 
 
