@@ -35,4 +35,11 @@ Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. C
 - **Sortir du microshell avec ctrl+d :**
 Pour savoir si l'utilisateur a utilisé ces deux touches, nous stockons dans une variable "bytesRead" la sortie de l'appel de la fonction read(0,command,49) (command est la chaîne de caractères qui stocke la commande entrée par l'utilisateur). Si bytesRead est égale à 0 alors l'utilisateur a bien cliqué sur <ctrl>+D. Dans ce cas là, nous appelons la fonction qui affiche le message bye bye puis nous sortons de la boucle while. 
 
-## 3. Affichage du code de retour (ou du signal) de la commande précédente dans le prompt :
+## 4. Affichage du code de retour (ou du signal) de la commande précédente dans le prompt :
+Nous voulons afficher à chaque message prompt l'état du programme compilé avant. 
+
+- Si le processus child du dernier programme compilé s'achève normalement, nous affichons dans le message prompt **enseash [exit:0]**.
+- Si le processus child du dernier programme est arrêté par un signal, nous affichichons dans le message prompt **enseash [sign:n]** avec n le nombre du signal utilisé pour arréter le processus child du dernier programme.
+
+## 5. Mesure du temps d’exécution de la commande en utilisant l’appel clock_gettime :
+  
