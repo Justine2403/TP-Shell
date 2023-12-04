@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <fcntl.h>
 #define PROMPT "\nenseash % "
 #define MAX_SIZE 128
 
@@ -45,18 +46,25 @@ void print_prompt_message(int status, long time_diff) {
 
 void tokenize_execute(){
 // Tokenize the command and arguments
-            char *token = strtok(command, " "); //split a string into tokens based on a specified delimiter.
-            char *args[MAX_SIZE];
-            int arg_count = 0;
+    char *token = strtok(command, " "); // split a string into tokens based on a specified delimiter.
+    char *args[MAX_SIZE];
+    int arg_count = 0; // count the number of arguments
 
-            while (token != NULL) {
-                args[arg_count++] = token;
-                token = strtok(NULL, " ");
-            }
-            args[arg_count] = NULL;
-            execvp(args[0], args); // execute the command with arguments
-            perror("error");  
-            exit(EXIT_FAILURE);
+    while (token != NULL) {
+        // Check for redirection symbols and handle separately
+        if (strcmp(token, "<") == 0 || strcmp(token, ">") == 0) {
+            token = strtok(NULL, " "); // Move to the next token after the redirection symbol
+            continue;
+        }
+
+        args[arg_count++] = token;
+        token = strtok(NULL, " ");
+    }
+    args[arg_count] = NULL;
+
+    execvp(args[0], args); // execute the command with arguments
+    perror("error");
+    exit(EXIT_FAILURE);
 }
 
 void handle_input_redirection(char *command) {
@@ -64,28 +72,34 @@ void handle_input_redirection(char *command) {
     if (input_redirect != NULL) {
         *input_redirect = '\0'; // Null terminate the command at '<'
         input_redirect++;        // Move to the filename after '<'
-        int fd = open(input_redirect, O_RDONLY);
+        while (*input_redirect == ' ') {
+            input_redirect++; // Skip any spaces after '<'
+        }
+        int fd = open(input_redirect, O_RDONLY); // Open the file for reading
         if (fd < 0) {
             perror("Error opening input file");
             exit(EXIT_FAILURE);
         }
-        dup2(fd, 0);
-        close(fd);
+        dup2(fd, 0); // Redirect stdin to the file
+        close(fd); // Close the file descriptor
     }
 }
 
 void handle_output_redirection(char *command) {
     char *output_redirect = strchr(command, '>');
     if (output_redirect != NULL) {
-        *output_redirect = '\0'; // Null terminate the command at '>'
-        output_redirect++;        // Move to the filename after '>'
-        int fd = open(output_redirect, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        *output_redirect = '\0'; 
+        output_redirect++;   
+        while (*output_redirect == ' ') {
+            output_redirect++; // Skip any spaces after '>'
+        }     
+        int fd = open(output_redirect, O_WRONLY | O_CREAT | O_TRUNC, 0644); // Open the file for writing
         if (fd < 0) {
             perror("Error opening output file");
             exit(EXIT_FAILURE);
         }
-        dup2(fd, 1);
-        close(fd);
+        dup2(fd, 1); // Redirect stdout to the file
+        close(fd); // Close the file descriptor
     }
 }
 
@@ -101,12 +115,16 @@ void execute(){
 
         exiting();
 
+         // Make a copy of the command string
+        char command_copy[MAX_SIZE];
+        strncpy(command_copy, command, MAX_SIZE);
+
         pid_t pid = fork();
 
         if (pid == 0) {
-            handle_input_redirection(command);
-            handle_output_redirection(command);
             tokenize_execute();
+            handle_input_redirection(command_copy);
+            handle_output_redirection(command_copy);
         } 
         else {
             
