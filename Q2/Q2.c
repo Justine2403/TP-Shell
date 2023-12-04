@@ -5,25 +5,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-int print_welcome_message() {
-	// define welcome message
-    char *msgWelcome = "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.";
-    //length of the string with strlen
-	write(1, msgWelcome, strlen(msgWelcome)); //fd = 1 is for Standard Output which is our terminal	
-}
+#define PROMPT "\nenseash % "
+#define MAX_SIZE 128
 
-int print_prompt_message() {
-	//show of simple prompt
-    char *msgPrompt = "\nenseash % ";
-    //length of the string with strlen
-	write(1, msgPrompt, strlen(msgPrompt));
+int print_message(char *output) {
+	write(1, output, strlen(output)); 
 }
 
 void execute(){
-    // define a array to store the command
-    char command[50]; 
+    char command[MAX_SIZE]; 
     while (1) {
-        read(0, command, 49);   
+        read(0, command, MAX_SIZE-1);   
 
         // replace newline character with null terminator
         char *pos;
@@ -34,21 +26,23 @@ void execute(){
         pid_t pid = fork();
 
         if (pid == 0) {
-            // this is the child process
             execlp(command, command, NULL); // execute the input command
+            perror("error");
+            exit(EXIT_FAILURE);
         }
+
         else{
             wait(NULL);
         }
         // output of the prompt again 
-        print_prompt_message();
+        print_message(PROMPT);
         }
 }
 
 int main (int argc, char **argv[]){
-    // show welcome message
-	print_welcome_message();
-    print_prompt_message();
+
+    print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+	print_message(PROMPT);
     execute(); // execute the shell 
     
     return 0;

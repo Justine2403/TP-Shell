@@ -4,70 +4,54 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#define PROMPT "\nenseash % "
+#define MAX_SIZE 128
 
-int print_welcome_message() {
-	// define welcome message
-    char *msgWelcome = "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.";
-    //length of the string with strlen
-	write(1, msgWelcome, strlen(msgWelcome)); //fd = 1 is for Standard Output which is our terminal	
+char command[MAX_SIZE]; 
+int bytesRead;
+
+int print_message(char *output) {
+	write(1, output, strlen(output)); 
 }
 
-int print_prompt_message() {
-	//show of simple prompt
-    char *msgPrompt = "\nenseash % ";
-    //length of the string with strlen
-	write(1, msgPrompt, strlen(msgPrompt));
+void exiting(){
+// check if command is "exit" or Ctrl+D
+    if ((strcmp(command, "exit") == 0) || (bytesRead == 0)) {
+    print_message("\nBye bye...\n");  // print bye bye message
+    exit(EXIT_SUCCESS); // break the loop
+    }
 }
 
-int print_bye_message(){
-	//show bye bye message for when exiting
-	char *msg_bye = "\nBye bye\n";
-	write(1, msg_bye, strlen(msg_bye));
-}
-
-void execute_exit(){
-    // define a array to store the command
-    char command[50]; 
+void execute(){
     while (1) {
-        int bytesRead = read(0, command, 49);
-
-        // Check for Ctrl+D command
-        if (bytesRead == 0) {
-        print_bye_message();  // print bye bye message
-        break; // break the loop
-        }
-
+        bytesRead = read(0, command, MAX_SIZE-1);
         // replace newline character with null terminator
         char *pos;
         if ((pos=strchr(command, '\n')) != NULL)
             *pos = '\0';
 
-        // check if command is "exit"
-        if (strcmp(command, "exit") == 0) {
-        print_bye_message();  // print bye bye message
-        break; // break the loop
-        }
-        
-        // create a child process
+        exiting();
+
         pid_t pid = fork();
 
         if (pid == 0) {
-            // this is the child process
             execlp(command, command, NULL); // execute the input command
+            perror("error");
+            exit(EXIT_FAILURE);
         }
+
         else{
             wait(NULL);
         }
-        // output of the prompt again 
-        print_prompt_message();
+
+        print_message(PROMPT);
         }
 }
 
 int main (int argc, char **argv[]){
-    // show welcome message
-	print_welcome_message();
-    print_prompt_message();
-    execute_exit(); // execute the shell 
-    
+    print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+	print_message(PROMPT);
+    execute(); 
+
     return 0;
 }

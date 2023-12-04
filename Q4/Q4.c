@@ -4,93 +4,72 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#define PROMPT "\nenseash % "
+#define MAX_SIZE 128
 
-int print_welcome_message() {
-	// define welcome message
-    char *msgWelcome = "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.";
-    //length of the string with strlen
-	write(1, msgWelcome, strlen(msgWelcome)); //fd = 1 is for Standard Output which is our terminal	
+char command[MAX_SIZE]; 
+int bytesRead;
+
+int print_message(char *output) {
+	write(1, output, strlen(output)); 
 }
 
-// Prints the prompt message.
-void print_prompt_message(int status) {
-    char msg[50];     // Declare a character array to hold message to be printed.
-    // Check if the child process exited normally.
-    if (WIFEXITED(status)) {
-        // If it did, get the exit status of the child.
-        int exit_status = WEXITSTATUS(status);
-        // Format the message to include the exit status.
-        int len = sprintf(msg, "\nenseash [exit:%d] %% ", exit_status);
-        // Write the message to the standard output.
-        write(1, msg, len);
-    } 
-    // Check if the child process was terminated by a signal.
-    else if (WIFSIGNALED(status)) {
-        // If it was, get the signal number that terminated the process.
-        int term_signal = WTERMSIG(status);
-        // Format the message to include the signal number.
-        int len = sprintf(msg, "\nenseash [sign:%d] %% ", term_signal);
-        // Write the message to the standard output.
-        write(1, msg, len);
-    } 
-    // If the child process neither exited normally nor was terminated by a signal,
-    // just print "enseash % ".
-    else {
-        write(1, "\nenseash % ", 10);
+void exiting(){
+// check if command is "exit" or Ctrl+D
+    if ((strcmp(command, "exit") == 0) || (bytesRead == 0)) {
+    print_message("\nBye bye...\n");  // print bye bye message
+    exit(EXIT_SUCCESS); // break the loop
     }
 }
 
-int print_bye_message(){
-	//show bye bye message for when exiting
-	char *msg_bye = "\nBye bye\n";
-	write(1, msg_bye, strlen(msg_bye));
+void print_prompt_message(int status) {
+    char msg[50];     
+
+    // Check if the child process exited normally.
+    if (WIFEXITED(status)) {
+        int exit_status = WEXITSTATUS(status);
+        int len = sprintf(msg, "\nenseash [exit:%d] %% ", exit_status);
+        print_message(msg);
+    } 
+    // Check if the child process was terminated by a signal.
+    else if (WIFSIGNALED(status)) {
+        int term_signal = WTERMSIG(status);
+        int len = sprintf(msg, "\nenseash [sign:%d] %% ", term_signal);
+        print_message(msg);
+    } 
+    else {
+        print_message(PROMPT);
+    }
 }
 
-void execute_exit(){
-    // define a array to store the command
-    char command[50]; 
+void execute(){
     int status = -1;
         while(1){
         print_prompt_message(status);
-        int bytesRead = read(0, command, 49);
+        bytesRead = read(0, command, MAX_SIZE);
         
-        // Check for Ctrl+D command
-        if (bytesRead == 0) {
-        print_bye_message();  // print bye bye message
-        break; // break the loop
-        }
-
         // replace newline character with null terminator
         char *pos;
         if ((pos=strchr(command, '\n')) != NULL)
             *pos = '\0';
 
-        // check if command is "exit"
-        if (strcmp(command, "exit") == 0) {
-        print_bye_message();  // print bye bye message
-        break; // break the loop
-        }
+        exiting();
         
-        // create a child process
         pid_t pid = fork();
 
         if (pid == 0) {
-            // this is the child process
-            execlp(command, command, NULL); // execute the input command
-            exit(0);
+            execlp(command, command, NULL);
+            perror("error");
+            exit(EXIT_FAILURE); 
         }
         else{
              waitpid(pid, &status, 0);
         }
-        }
-
+    }
 }
 
-
 int main (int argc, char **argv[]){
-    // show welcome message
-	print_welcome_message();
-    execute_exit(); // execute the shell 
-    
+    print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+    execute(); 
     return 0;
 }
