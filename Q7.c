@@ -48,18 +48,19 @@ void print_prompt_message(int status, long time_diff) {
 
 void tokenize_execute(){
 // Tokenize the command and arguments
-    char *token = strtok(command, " "); // split a string into tokens based on a specified delimiter.
+    char *token = strtok(command, " ");
     char *args[MAX_SIZE];
-    int arg_count = 0; // count the number of arguments
+    int arg_count = 0;
 
     while (token != NULL) {
-        // Check for redirection symbols and handle separately
-        if (strcmp(token, "<") == 0 || strcmp(token, ">") == 0) {
-            token = strtok(NULL, " "); // Move to the next token after the redirection symbol
-            continue;
+        if (strcmp(token, ">") == 0 || strcmp(token, "<") == 0) {
+            token = strtok(NULL, "\n"); // Treat everything after > as a single argument
+            args[arg_count++] = token;
+            break;
+            
+        } else {
+            args[arg_count++] = token;
         }
-
-        args[arg_count++] = token;
         token = strtok(NULL, " ");
     }
     args[arg_count] = NULL;
@@ -69,11 +70,13 @@ void tokenize_execute(){
     exit(EXIT_FAILURE);
 }
 
+//input redirection
 void handle_input_redirection(char *command) {
     char *input_redirect = strchr(command, '<');
     if (input_redirect != NULL) {
         *input_redirect = '\0'; // Null terminate the command at '<'
-        input_redirect++;        // Move to the filename after '<'
+        input_redirect++;       
+       
         while (*input_redirect == ' ') {
             input_redirect++; // Skip any spaces after '<'
         }
@@ -87,11 +90,13 @@ void handle_input_redirection(char *command) {
     }
 }
 
+//output redirection
 void handle_output_redirection(char *command) {
     char *output_redirect = strchr(command, '>');
     if (output_redirect != NULL) {
         *output_redirect = '\0'; 
-        output_redirect++;   
+        output_redirect++;    // Move to the filename after '<'
+        
         while (*output_redirect == ' ') {
             output_redirect++; // Skip any spaces after '>'
         }     
@@ -101,7 +106,7 @@ void handle_output_redirection(char *command) {
             exit(EXIT_FAILURE);
         }
         dup2(fd, 1); // Redirect stdout to the file
-        close(fd); // Close the file descriptor
+        close(fd); 
     }
 }
 
