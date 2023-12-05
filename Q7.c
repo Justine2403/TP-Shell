@@ -7,6 +7,7 @@
 #include <time.h>
 #include <fcntl.h>
 #define PROMPT "\nenseash % "
+#define WELCOME "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'."
 #define MAX_SIZE 128
 
 char command[MAX_SIZE]; 
@@ -70,7 +71,7 @@ void tokenize_execute(){
     exit(EXIT_FAILURE);
 }
 
-//input redirection
+//define input redirection
 void handle_input_redirection(char *command) {
     char *input_redirect = strchr(command, '<');
     if (input_redirect != NULL) {
@@ -90,7 +91,7 @@ void handle_input_redirection(char *command) {
     }
 }
 
-//output redirection
+//define output redirection
 void handle_output_redirection(char *command) {
     char *output_redirect = strchr(command, '>');
     if (output_redirect != NULL) {
@@ -150,7 +151,7 @@ void execute(){
 
 int main (int argc, char **argv[]){
     // show welcome message
-	print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+	print_message(WELCOME);
     print_message(PROMPT);
     execute(); // execute the shell 
     
