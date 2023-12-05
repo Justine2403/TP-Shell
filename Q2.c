@@ -6,12 +6,15 @@
 #include <stdlib.h>
 
 #define PROMPT "\nenseash % "
+#define WELCOME "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'."
 #define MAX_SIZE 128
+
 
 int print_message(char *output) {
 	write(1, output, strlen(output)); 
 }
 
+//create a function to execute the shell
 void execute(){
     char command[MAX_SIZE]; 
     while (1) {
@@ -41,7 +44,7 @@ void execute(){
 
 int main (int argc, char **argv[]){
 
-    print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+    print_message(WELCOME);
 	print_message(PROMPT);
     execute(); // execute the shell 
     
