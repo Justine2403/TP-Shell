@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #define PROMPT "\nenseash % "
+#define WELCOME "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'."
 #define MAX_SIZE 128
 
 char command[MAX_SIZE]; 
@@ -14,6 +15,7 @@ int print_message(char *output) {
 	write(1, output, strlen(output)); 
 }
 
+//define a function to exit the shell
 void exiting(){
 // check if command is "exit" or Ctrl+D
     if ((strcmp(command, "exit") == 0) || (bytesRead == 0)) {
@@ -25,7 +27,6 @@ void exiting(){
 void execute(){
     while (1) {
         bytesRead = read(0, command, MAX_SIZE-1);
-        // replace newline character with null terminator
         char *pos;
         if ((pos=strchr(command, '\n')) != NULL)
             *pos = '\0';
@@ -35,7 +36,7 @@ void execute(){
         pid_t pid = fork();
 
         if (pid == 0) {
-            execlp(command, command, NULL); // execute the input command
+            execlp(command, command, NULL); 
             perror("error");
             exit(EXIT_FAILURE);
         }
@@ -43,13 +44,12 @@ void execute(){
         else{
             wait(NULL);
         }
-
         print_message(PROMPT);
-        }
+    }
 }
 
 int main (int argc, char **argv[]){
-    print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+    print_message(WELCOME);
 	print_message(PROMPT);
     execute(); 
 
