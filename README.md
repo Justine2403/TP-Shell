@@ -1,94 +1,117 @@
 # TP-Shell
-Réaliser un micro shell, affichant les codes de sortie et les temps d’exécution des programmes lancés
+Create a micro shell that displays the exit codes and execution times of launched programs.
 
-## 1. Affichage d’un message d’accueil, suivi d’un prompt simple: 
-Pour afficher le message d'accueil et les message prompt nous utilisons la fonction **write**. 
-Expliquons ce que fait cette fonction en détails : 
-- **Write** prend 3 arguments : un entier 0 ou 1 si le message/chaîne de caractères est un input 0 ou output 1 (dans notre cas : 1), une chaîne de caractère qui contient le message à afficher et la taille du message qui peut être récupéré en appelant la fonction strlen.
+## 1. Display a welcome message, followed by a simple prompt.: 
 
-Lorsque nous compilons le fichier c qui contient ce programme nous nommons son exécutable enseash à l'aide de la commande gcc -o enseash Q1.c. Nous avons réussi à créer un microshell qui affiche un message prompt et un message d'accueil.
+To display the welcome message and the prompt messages, we use the **write** function.
+Let's explain what this function does in detail:
 
-## 2. Exécution de la commande saisie et retour au prompt (REPL : read–eval–print loop) :
-### a. Lecture de la commande saisie : 
-Nous voulons importer dans notre microshell les commandes déjà définies pour notre terminal, tels que **fortune** et **date**. 
-Pour cela, nous créeons à l'intérieur d'une boucle while infinie un **processus fils** à l'aide de la fonction **fork** qui retourne 0 si nous sommes dans le processus enfant et 1 si nous revenons au **processus père**. Cette méthode sert à créer notre propre programme dans notre nouveau microshell enseash. 
+- **Write** takes 3 arguments: an integer 0 or 1 if the message/string is an input 0 or output 1 (in our case: 1), a string containing the message to be displayed, and the size of the message, which can be obtained by calling the strlen function.
 
-Expliquons comment nous faisons cela :
-- Dans une boucle while(1), nous stockons tout d'abord la commande écrite par l'utilsateur après avoir lancé enseash (cf. Q1) et la lisons à l'aide de la fonction **read** (mêmes arguments que write).
-- Nous appelons ensuite la fonction fork et stockons son résultat dans une variable de type pid_t appelée pid.
-- Si nous sommes dans le processus fils (pid==0 ), nous utilisons la fonction execlp qui permet de lire la commande entrée par l'utilisateur et l'identifier avec une commande existante dans le terminal et l'appliquer.
-- Si nous sommes dans le processus père, nous attendons que l'utilsateur entre une commande .
+When we compile the C file containing this program, we name its executable "enseash" using the command gcc -o enseash Q1.c. We have successfully created a microshell that displays a prompt message and a welcome message.
 
-### b. Exécution d’une commande simple (sans argument) :
-Pour l'instant, nous sommes arrivées à exécuter des commandes dans notre microshell tels que fortune et date. Ces commandes ne prennent aucun argument.
+## 2. Execution of the entered command and return to the prompt (REPL : read–eval–print loop):
+### a. Read the command entered by user: 
+We want to import into our microshell the commands already defined for our terminal, such as **fortune** and **date**.
+For this, we create a child process inside an infinite while loop using the **fork** function, which returns 0 if we are in the child process and 1 if we are back in the **parent process**. This method is used to create our own program in our new microshell "enseash".
 
-### c. Retour au prompt enseash % et attente de la commande suivante :
-Dans la même boucle, nous faisons appel à une fonction définie dans le document functions.h (Cf. dossier Q2). Cette fonction a pour but d'écrire le message prompt en utilisant write, elle est appelée avant de stocker le processus fils et une fois que nous soyons sortie du processus fils et dans l'attente d'une nouvelle commande.
+Let's explain how we do this:
+
+- In a while(1) loop, we first store the command written by the user after launching "enseash" (cf. Q1) and read it using the **read** function (same arguments as write).
+- We then call the fork function and store its result in a variable of type pid_t called pid.
+- If we are in the child process (pid==0), we use the execlp function, which reads the command entered by the user and identifies it with an existing command in the terminal, and applies it.
+- If we are in the parent process, we wait for the user to enter a command.
+    
+### b. Execute this command (simple command for the moment, without argument) :
+So far, we have managed to execute commands in our microshell such as fortune and date. These commands take no arguments.
+
+### c. Print the prompt enseash % and waits for a new command :
+In the same loop, we call a function defined in the functions.h document (See folder Q2). This function is intended to write the prompt message using write; it is called before storing the child process and once we have exited the child process and are waiting for a new command.
  
-## 3. Gestion de la sortie du shell avec la commande “exit” ou un <ctrl>+d : 
-Pour sortir du microshell il faut casser la boucle avec la fonction **exit(EXIT_SUCESS)** dans notre programme.
-Nous créeons comme pour le message prompt, une fonction qui affiche un message de bye bye que nous allons appeler dans la suite.
+## 3. Management of the shell output with the command ”exit” or with <ctrl>+d : 
+To exit the microshell, you need to break the loop with the **exit(EXIT_SUCCESS)** function in our program.
+As we did for the prompt message, we create a function that displays a bye-bye message, which we will call later.
 
-- **Sortir du microshell avec la commande exit :**
-Si la commande entrée par l'utilisateur est exit, nous sortons du microshell. Cela se fait grâce à la fonction exceclp qui compare la commande entrée avec exit qui existe déjà dans le terminal. Si nous sommes dans ce cas la fonction du message bye bye est appelé puis nous cassons la boucle avec exit(EXIT_SUCESS).
+- **Exiting the microshell with the exit command :**
+If the command entered by the user is exit, we exit the microshell. This is done using the execlp function, which compares the entered command with exit, which already exists in the terminal. If we are in this case, the bye-bye message function is called, and we break the loop with exit(EXIT_SUCCESS).
 
-- **Sortir du microshell avec ctrl+d :**
-Pour savoir si l'utilisateur a utilisé ces deux touches, nous stockons dans une variable "bytesRead" la sortie de l'appel de la fonction read(0,command,49) (command est la chaîne de caractères qui stocke la commande entrée par l'utilisateur). Si bytesRead est égale à 0 alors l'utilisateur a bien cliqué sur <ctrl>+D. Dans ce cas là, nous appelons la fonction qui affiche le message bye bye puis nous sortons de la boucle while. 
+- **Exiting the microshell avec ctrl+d :**
+To know if the user used these two keys, we store in a variable "bytesRead" the output of the read(0, command, 49) function call (command is the string that stores the command entered by the user). If bytesRead is equal to 0, then the user did click on <ctrl>+D. In this case, we call the function that displays the bye-bye message, and we exit the while loop.
 
-## 4. Affichage du code de retour (ou du signal) de la commande précédente dans le prompt :
-Nous voulons afficher à chaque message prompt l'état du programme compilé avant. 
+## 4. Display the return code (or signal) of the previous command in the prompt :
+We want to display the state of the compiled program before each prompt message.
 
-- Si le processus child du dernier programme compilé s'achève normalement, nous affichons dans le message prompt **enseash [exit:0]**.
-- Si le processus child du dernier programme est arrêté par un signal, nous affichichons dans le message prompt **enseash [sign:n]** avec n le nombre du signal utilisé pour arréter le processus child du dernier programme.
-Nous utilisons la fonction **WIFEXITED** pour savoir de quelle manière est teminé le processus fils.
+- If the child process of the last compiled program terminates normally, we display in the prompt message **enseash [exit:0]**.
+- If the child process of the last program is stopped by a signal, we display in the prompt message **enseash [sign:n]** with n being the number of the signal used to stop the child process of the last program.
+- We use the **WIFEXITED** function to find out how the child process terminated.
 
-## 5. Mesure du temps d’exécution de la commande en utilisant l’appel clock_gettime :
-En plus du retour exit ou signal sur le dernier programme compilé, nous souhaitons ajouter le temps d'éxecution. 
-Pour cela, nous utilisons la fonction **clock_gettime** et l'appelons dans la fonction qui affiche le message prompt. 
+## 5. Measurement of the command execution time using the call clock_gettime :
 
-Expliquons en details ce que fait les differentes fonctions de **clock_gettime** :
-- clock_gettime(CLOCK_REALTIME, &start) permet d'obtenir le temps actuelle du système et le stocke dans la structure start
-- clock_gettime(CLOCK_REALTIME, &end) utilise à nouveau clock_gettime pour obtenir le temps actuel et le stocke dans la structure end après la fin de l'exécution du processus fils.
-- waitpid(pid, &status, 0) attend que le processus fils identifié par le PID (pid) se termine. Pendant cette attente, le processus parent est bloqué. La fonction waitpid stocke le statut de sortie du processus fils dans la variable status.
-- On calcule ensuite la différence de temps, elle est calculée en millisecondes à l'aide des champs tv_sec (secondes) et tv_nsec (nanosecondes) de la structure start et end. Cette différence est stockée dans la variable time_diff.
-On implémente ensuite ce temps d'execution dans le prompt_message afin de l'afficher sur notre shell.
+In addition to the exit or signal return on the last compiled program, we want to add the execution time.
+For this, we use the **clock_gettime** function and call it in the function that displays the prompt message.
 
-## 6. Exécution d’une commande complexe (avec arguments) :
-Dans cette partie, nous cherchons à executer une commande avec arguments dans le shell.
+Let's explain in detail what the different clock_gettime functions do:
 
-- Pour cela nous allons créer une fonction token qui permet d'extraire le premier jeton (token) de la chaîne command. **strtok** est utilisée pour diviser une chaîne en jetons en fonction d'un délimiteur spécifié. Dans ce cas, le délimiteur est un espace (" ").
-- On crée un tableau de pointeurs de caractères (args) pour stocker les tokens. MAX_SIZE est le nombre maximum de tokens que nous pouvons gérer.
-- La variable arg_count est utilisée pour suivre le nombre de tokens.
-- Nous executons ensuite une boucle qui continue jusqu'à ce qu'il n'y ait plus de tokens. La condition vérifie si le jeton actuel n'est pas NULL.
+- clock_gettime(CLOCK_REALTIME, &start) gets the current system time and stores it in the start structure.
+- clock_gettime(CLOCK_REALTIME, &end) uses clock_gettime again to get the current time and stores it in the end structure after the child process has finished execution.
+- waitpid(pid, &status, 0) waits for the child process identified by PID (pid) to terminate. During this wait, the parent process is blocked. The waitpid function stores the exit status of the child process in the status variable.
+- We then calculate the time difference; it is calculated in milliseconds using the tv_sec (seconds) and tv_nsec (nanoseconds) fields of the start and end structures. This difference is stored in the time_diff variable.
+- We then implement this execution time in the prompt_message to display it in our shell.
 
-Cette fonction sera implémenté dans la boucle if.
+## 6. Execution of a complex command (with arguments) :
+In this part, we aim to execute a command with arguments in the shell.
 
-- On remplace la fonction execlp(command, command, NULL) par execvp(args[0], args) qui execute la commande avec arguments.
+- For this, we will create a token function that extracts the first token from the command string. **strtok** is used to split a string into tokens based on a specified delimiter. In this case, the delimiter is a space (" ").
+- We create an array of character pointers (args) to store the tokens. MAX_SIZE is the maximum number of tokens we can handle.
+- The arg_count variable is used to track the number of tokens.
+- We then run a loop that continues until there are no more tokens. The condition checks if the current token is not NULL.
 
-## 7. Gestion des redirections vers stdin et stdout avec ‘<’ et ‘>’:
-Dans cette partie, l'objectif est de gérer la redirection des entrées (<) et des sorties (>) pour les commandes saisies dans le microshell 
-On inclut d'abord <fcntl.h>
-On définit deux fonctions pour l'input et l'output.
-Pour l'input, on effectue les étapes suivantes:
-- Trouver le symbole **<** :
-       strchr recherche la première occurrence du caractère < dans la chaîne command. S'il est trouvé, il renvoie un pointeur vers cette position.
+This function will be implemented in the if statement.
 
-- Ajuster la chaîne de commande :
-        *input_redirect = '\0'; : Termine la chaîne de commande à la position de <.
-        input_redirect++; : Déplace le pointeur vers le nom de fichier après <.
+- We replace the execlp(command, command, NULL) function with execvp(args[0], args), which executes the command with arguments.
 
-- Ignorer les espaces après < :
-        while (*input_redirect == ' ') { input_redirect++; } : Ignore les espaces éventuels après <. Cela garantit qu'il n'y a pas d'espaces supplémentaires entre < et le nom de fichier.
+## 7. Management of redirections to stdin and stdout with ’<’ and ’>’ :
 
-- Ouvrir le fichier en lecture :
-        int fd = open(input_redirect, O_RDONLY); : Ouvre le fichier spécifié après < en mode lecture seule (O_RDONLY).
-        Vérifie si l'ouverture du fichier a réussi, et sinon, affiche un message d'erreur et quitte.
+In this part, the goal is to handle redirection of inputs (<) and outputs (>) for commands entered in the microshell.
+We first include <fcntl.h>.
+We define two functions for input and output.
+For input, we perform the following steps:
 
-- Rediriger stdin vers le fichier :
-        dup2(fd, 0); : Redirige le descripteur de fichier fd (le fichier ouvert) vers l'entrée standard (descripteur de fichier 0).
-        close(fd); : Ferme le descripteur de fichier car il n'est plus nécessaire.
-  
-On fait de même pour l'output mais avec stdout.
+- Find the < symbol:
+	strchr searches for the first occurrence of the < character in the command string. If found, it returns a pointer to that position.
 
+- Adjust the command string:
+	*input_redirect = '\0';: Terminates the command string at the position of <.
+	input_redirect++;: Moves the pointer to the filename after <.
+
+- Ignore spaces after <:	
+	while (*input_redirect == ' ') { input_redirect++; }: Ignores any spaces after <. This ensures that there are no additional spaces between < and the filename.
+
+- Open the file for reading:
+	int fd = open(input_redirect, O_RDONLY); :Open the file specified after < in read-only mode (O_RDONLY).
+Check if the file opening is successful. If not, display an error message and exit.
+
+- Redirect stdin to the file:
+	Redirect the file descriptor fd (representing the opened file) to standard input (file descriptor 0).
+	Close the file descriptor as it is no longer needed.
+
+The same procedure is applied for output redirection, but with stdout.
+
+## 8. Management of pipe redirection with ‘|’ :
+
+We want to enable the shell to handle pipe redirection, allowing commands like ls | wc -l to work as expected. 
+To make it work, we need  perform the following steps:
+
+- Tokenizing for Pipes:
+This part tokenizes the command to identify the presence of the pipe (|). When a pipe is found, it sets up pipes and executes commands on each side.
+
+- Creating Pipes:
+It creates a pipe using the pipe system call. The array pipe_fd holds the file descriptors for the read and write ends of the pipe.
+
+- Forking for Left Side of the Pipe:
+In the child process, it sets up redirection to write to the pipe "STDOUT_FILENO" is redirected to the write end of the pipe), and then it executes the command on the left side of the pipe using tokenize_execute().
+
+- Forking for Right Side of the Pipe:
+In the parent process, it sets up redirection to read from the pipe "STDIN_FILENO" is redirected to the read end of the pipe), and then it executes the command on the right side of the pipe using tokenize_execute(). Finally, it waits for both child processes to finish, and it resets stdin to the terminal.
 
 
