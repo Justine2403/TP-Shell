@@ -13,6 +13,8 @@ char command[MAX_SIZE];
 int bytesRead;
 struct timespec start, end; // Variables to store the start and end times
 int status = -1;
+char *inputFile = NULL;
+char *outputFile = NULL;
 
 
 int print_message(char *output) {
