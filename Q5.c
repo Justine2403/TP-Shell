@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #define PROMPT "\nenseash % "
+#define WELCOME "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'."
 #define MAX_SIZE 128
 
 char command[MAX_SIZE]; 
@@ -43,6 +44,7 @@ void print_prompt_message(int status, long time_diff) {
     } 
 }
 
+//adding time difference in execute
 void execute(){       
         while(1){
         bytesRead = read(0, command, MAX_SIZE-1);
@@ -78,7 +80,7 @@ void execute(){
 
 int main (int argc, char **argv[]){
     // show welcome message
-	print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+	print_message(WELCOME);
     print_message(PROMPT);
     execute(); // execute the shell 
     
