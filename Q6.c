@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #define PROMPT "\nenseash % "
+#define WELCOME "Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'."
 #define MAX_SIZE 128
 
 char command[MAX_SIZE]; 
@@ -42,6 +43,8 @@ void print_prompt_message(int status, long time_diff) {
         write(1, msg, len);
     } 
 }
+
+//define a function to tokenize and execute the command
 void tokenize_execute(){
 // Tokenize the command and arguments
             char *token = strtok(command, " "); //split a string into tokens based on a specified delimiter.
@@ -56,7 +59,7 @@ void tokenize_execute(){
             execvp(args[0], args); // execute the command with arguments
             perror("error");  
             exit(EXIT_FAILURE);
- }
+}
 
 void execute(){       
         while(1){
@@ -80,7 +83,7 @@ void execute(){
             clock_gettime(CLOCK_REALTIME, &start); // Get the current time before 
             waitpid(pid, &status, 0);
             clock_gettime(CLOCK_REALTIME, &end); // Get the current time after 
-
+            
             // Calculate the time difference 
             long time_diff = (end.tv_sec - start.tv_sec) * 1000 + (end.tv_nsec - start.tv_nsec) / 1000000;
             print_prompt_message(status, time_diff);
@@ -92,7 +95,7 @@ void execute(){
 
 int main (int argc, char **argv[]){
     // show welcome message
-	print_message("Bienvenue dans le Shell ENSEA.\nPour quitter, tapez 'exit'.");
+	print_message(WELCOME);
     print_message(PROMPT);
     execute(); // execute the shell 
     
